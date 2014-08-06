@@ -35,7 +35,7 @@ World.prototype.createEntity = function(name) {
   for (var funcName in def.funcs) {
     (function(name, f) {
       entity[name] = function() {
-        f.call(entity);
+        f.apply(entity, arguments);
       };
     })(funcName, def.funcs[funcName]);
   }

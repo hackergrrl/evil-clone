@@ -69,7 +69,7 @@ test('create local entity', function(t) {
   // Q: how do ReplicationChannels get set up?
 });
 
-test('local entity functions', function(t) {
+test('local entity function; no args', function(t) {
   var world = localStockWorld();
 
   var pmass = world.createEntity("point-mass");
@@ -80,6 +80,21 @@ test('local entity functions', function(t) {
 
   t.equal(pmass.x, 50);
   t.equal(pmass.y, 60);
+
+  t.end();
+});
+
+test('local entity function; with args', function(t) {
+  var world = localStockWorld();
+
+  var pmass = world.createEntity("point-mass");
+  t.equal(pmass.x, 0);
+  t.equal(pmass.y, 0);
+
+  pmass.teleportTo(97, -18);
+
+  t.equal(pmass.x, 97);
+  t.equal(pmass.y, -18);
 
   t.end();
 });
