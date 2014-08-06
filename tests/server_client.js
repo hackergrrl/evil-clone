@@ -52,6 +52,8 @@ function hookupServerClient(server, client) {
   clientEndpoint.runEntityFunction = function(entityId, funcName, args) {
     serverEndpoint.onRunEntityFunction(entityId, funcName, args);
   };
+
+  return [serverEndpoint, clientEndpoint];
 }
 
 function stockWorld() {
@@ -59,6 +61,7 @@ function stockWorld() {
 
   world.defineEntity("point-mass", {
     vars: {
+      remoteRole: repl.Role.DumbProxy,
       x: 0,
       y: 0,
       mass: 1,
@@ -145,12 +148,34 @@ test('server/client world', function(t) {
 
   hookupServerClient(serverWorld, clientWorld);
 
+  t.ok('worked');
+
   t.end();
 });
 
 
-// ReplicationChannel
-// ...
+// Creation replication
+test('server entity replication', function(t) {
+  t.plan(1);
+
+  var clientWorld = clientStockWorld();
+  var serverWorld = serverStockWorld();
+
+  var endpoints = hookupServerClient(serverWorld, clientWorld);
+  var serverEndpoint = endpoints[0];
+  var clientEndpoint = endpoints[1];
+
+  clientEndpoint.createEntity = function(entityId) {
+    t.ok('entity created');
+  };
+
+  var serverEntity = serverWorld.createEntity("point-mass");
+
+  // TODO(noffle): this is a private function that real code shouldn't use
+  serverWorld.tick();
+
+  t.end();
+});
 
 
 

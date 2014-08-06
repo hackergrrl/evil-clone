@@ -61,39 +61,54 @@ World.prototype.createEntity = function(name) {
 World.prototype.createNetworkEndpoint = function() {
   var endpoint = new NetworkEndpoint();
 
-  // Events that a user of NetworkEndpoint needs to call as they come in from
-  // over the network.
-  endpoint.onCreateEntity = function() {
-    // TODO: create entity
-  };
-  endpoint.onDestroyEntity = function() {
-    // TODO: destroy entity
-  };
-  endpoint.onUpdateEntityVars = function() {
-    // TODO: update entity
-  };
-  endpoint.onRunEntityFunction = function() {
-    // TODO: call entity func
-  };
-
-  // Stubs that a NetworkEndpoint implementation needs to set.
-  endpoint.createEntity = function() {
-  };
-  endpoint.destroyEntity = function() {
-  };
-  endpoint.updateEntityVars = function() {
-  };
-  endpoint.runEntityFunction = function() {
-  };
-
   return endpoint;
+};
+
+// Perform a network tick.
+//  1. flush all var updates down all entities' ReplicationChannels
+//  2. ???
+//  3. ???
+World.prototype.tick = function() {
 };
 
 
 function Entity() {
+  this.replicationChannels = [];
 }
 
 function NetworkEndpoint() {
+}
+
+// Events that a user of NetworkEndpoint needs to call as they come in from
+// over the network.
+NetworkEndpoint.prototype.onCreateEntity = function() {
+  // TODO: create entity
+  console.log('TODO: create entity');
+};
+NetworkEndpoint.prototype.onDestroyEntity = function() {
+  // TODO: destroy entity
+  console.log('TODO: destroy entity');
+};
+NetworkEndpoint.prototype.onUpdateEntityVars = function() {
+  // TODO: update entity
+  console.log('TODO: update entity');
+};
+NetworkEndpoint.prototype.onRunEntityFunction = function() {
+  // TODO: call entity func
+  console.log('TODO: call func on entity');
+};
+
+// Stubs that a NetworkEndpoint implementation needs to set.
+NetworkEndpoint.prototype.createEntity = function() {};
+NetworkEndpoint.prototype.destroyEntity = function() {};
+NetworkEndpoint.prototype.updateEntityVars = function() {};
+NetworkEndpoint.prototype.runEntityFunction = function() {};
+
+
+function ReplicationChannel() {
+  this.networkEndpoint = null;
+  this.entity = null;
+  this.varSnapshot = {};
 }
 
 
