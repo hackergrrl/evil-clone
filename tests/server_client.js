@@ -22,6 +22,38 @@ function clientStockWorld() {
   return world;
 }
 
+// Hook up server and client endpoints to talk directly to each other.
+function hookupServerClient(server, client) {
+  var serverEndpoint = server.createNetworkEndpoint();
+  var clientEndpoint = client.createNetworkEndpoint();
+
+  serverEndpoint.createEntity = function(entityId) {
+    clientEndpoint.onCreateEntity(entityId);
+  };
+  serverEndpoint.destroyEntity = function(entityId) {
+    clientEndpoint.onDestroyEntity(entityId);
+  };
+  serverEndpoint.setEntityVars = function(entityId, vars) {
+    clientEndpoint.onUpdateEntityVars(entityId, vars);
+  };
+  serverEndpoint.runEntityFunction = function(entityId, funcName, args) {
+    clientEndpoint.onRunEntityFunction(entityId, funcName, args);
+  };
+
+  clientEndpoint.createEntity = function(entityId) {
+    serverEndpoint.onCreateEntity(entityId);
+  };
+  clientEndpoint.destroyEntity = function(entityId) {
+    serverEndpoint.onDestroyEntity(entityId);
+  };
+  clientEndpoint.setEntityVars = function(entityId, vars) {
+    serverEndpoint.onUpdateEntityVars(entityId, vars);
+  };
+  clientEndpoint.runEntityFunction = function(entityId, funcName, args) {
+    serverEndpoint.onRunEntityFunction(entityId, funcName, args);
+  };
+}
+
 function stockWorld() {
   var world = new repl.World();
 
@@ -54,9 +86,9 @@ function stockWorld() {
   return world;
 }
 
+
 test('create server entity', function(t) {
   var serverWorld = serverStockWorld();
-  // var clientWorld = clientStockWorld();
 
   var pmass = serverWorld.createEntity("point-mass");
   t.equal(pmass.type, "point-mass");
@@ -85,6 +117,8 @@ test('create client entity', function(t) {
   t.end();
 });
 
+
+// NetworkEndpoint
 test('network endpoint exists', function(t) {
   var world = serverStockWorld();
 
@@ -102,19 +136,34 @@ test('network endpoint exists', function(t) {
   t.equals(typeof endpoint.updateEntityVars, 'function');
   t.equals(typeof endpoint.runEntityFunction, 'function');
 
-  // endpoint.createEntity = function(entity_id) {
-  // };
-  // endpoint.destroyEntity = function(entity_id) {
-  // };
-  // endpoint.setEntityVars = function(entity_id, vars) {
-  // };
-  // endpoint.runEntityFunction = function(entity_id, funcName, args) {
-  // };
-  // endpoint.onCreateEntity(14);
-  // endpoint.onDestroyEntity(88);
-  // endpoint.onSetEntityVars(63, { battery: 12 });
-  // endpoint.onRunEntityFunction(30, 'teleportTo', [17, 21]);
+  t.end();
+});
+
+test('server/client world', function(t) {
+  var clientWorld = clientStockWorld();
+  var serverWorld = serverStockWorld();
+
+  hookupServerClient(serverWorld, clientWorld);
 
   t.end();
 });
 
+
+// ReplicationChannel
+// ...
+
+
+
+
+
+// Replication tests:
+//   entity creation
+//     server => client entity creation (both already active)
+//     server => client entity creation (client joins AFTER creation)
+//     server creates entity /w no remoteRole; client sees nothing
+//     client creates entity /w a remoteRole; doesn't goto server
+//   entity destruction
+//   setting vars
+//     ...
+//   calling funcs
+//     ...

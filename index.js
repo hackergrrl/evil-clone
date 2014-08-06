@@ -58,8 +58,42 @@ World.prototype.createEntity = function(name) {
   return entity;
 };
 
+World.prototype.createNetworkEndpoint = function() {
+  var endpoint = new NetworkEndpoint();
+
+  // Events that a user of NetworkEndpoint needs to call as they come in from
+  // over the network.
+  endpoint.onCreateEntity = function() {
+    // TODO: create entity
+  };
+  endpoint.onDestroyEntity = function() {
+    // TODO: destroy entity
+  };
+  endpoint.onUpdateEntityVars = function() {
+    // TODO: update entity
+  };
+  endpoint.onRunEntityFunction = function() {
+    // TODO: call entity func
+  };
+
+  // Stubs that a NetworkEndpoint implementation needs to set.
+  endpoint.createEntity = function() {
+  };
+  endpoint.destroyEntity = function() {
+  };
+  endpoint.updateEntityVars = function() {
+  };
+  endpoint.runEntityFunction = function() {
+  };
+
+  return endpoint;
+};
+
 
 function Entity() {
+}
+
+function NetworkEndpoint() {
 }
 
 
