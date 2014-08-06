@@ -1,5 +1,7 @@
 function World() {
   this.entityDefs = {};
+  this.networkEndpoints = [];
+  this.entities = {};
 }
 
 World.prototype.runAs = function(mode, opts) {
@@ -10,8 +12,22 @@ World.prototype.defineEntity = function(name, opts) {
   this.entityDefs[name] = opts;
 };
 
+(function() {
+  var currentId = 0;
+  World.prototype.generateId = function() {
+    var id = ++currentId;
+
+    // Wholly client-side IDs are always negative, to avoid conflict.
+    if (this.networkMode === NetworkMode.Client) {
+      id = -id;
+    }
+
+    return id;
+  }
+})();
+
 // Create a new entity that is local to THIS machine.
-World.prototype.createEntity = function(name) {
+World.prototype.createEntity = function(name, id) {
   var def = this.entityDefs[name];
   if (def === null || def === undefined) {
     return null;
@@ -19,6 +35,17 @@ World.prototype.createEntity = function(name) {
 
   var entity = new Entity();
   entity.type = name;
+
+  // Assign an ID, if one is not given.
+  if (id != undefined) {
+    entity.id = id;
+  } else {
+    entity.id = this.generateId();
+  }
+  this.entities[entity.id] = entity;
+
+  // List of (live) replication channels.
+  entity.channels = [];
 
   // Local entities are always Authority.
   entity.role = Role.Authority;
@@ -59,9 +86,9 @@ World.prototype.createEntity = function(name) {
 };
 
 World.prototype.createNetworkEndpoint = function() {
-  var endpoint = new NetworkEndpoint();
+  var endpoint = new NetworkEndpoint(this);
 
-  // TODO: track all endpoints in the world
+  this.networkEndpoints.push(endpoint);
 
   return endpoint;
 };
@@ -70,7 +97,17 @@ World.prototype.createNetworkEndpoint = function() {
 //  1. flush all var updates down all entities' ReplicationChannels
 //  2. ???
 //  3. ???
+//  TODO: one day, this'll detect all entities that are relevant to each player
+//  but are NOT currently being tracked, and create replication channels for
+//  them.
 World.prototype.tick = function() {
+  // Tick all replication channels of all entities.
+  for (var id in this.entities) {
+    var entity = this.entities[id];
+    for (var i in entity.channels) {
+      entity.channels[i].tick();
+    }
+  }
 };
 
 
@@ -78,26 +115,35 @@ function Entity() {
   this.replicationChannels = [];
 }
 
-function NetworkEndpoint() {
+function NetworkEndpoint(world) {
+  this.world = world;
 }
 
 // Events that a user of NetworkEndpoint needs to call as they come in from
 // over the network.
-NetworkEndpoint.prototype.onCreateEntity = function() {
-  // TODO: create entity
-  // TODO: create a new ReplicationChannel for each NetworkEndpoint (relevancy)
-  // TODO: have some bit unset that indicates that entity creation hasn't been replicated yet
-  console.log('TODO: create entity');
+NetworkEndpoint.prototype.onCreateEntity = function(entityId, defName) {
+  var entity = world.createEntity(defName, entityId);
+
+  // TODO: once there's a notion of 'relevancy', the below should simply happen
+  // automatically in tick, as the world realizes that there are entities that
+  // are relevant to a player that aren't being replicated.
+  // TODO: only create a replication channel if it makes sense (e.g. not if
+  // Role.None is involved)
+  for (var i in this.world.networkEndpoints) {
+    var endpoint = this.world.networkEndpoints[i];
+    var channel = new ReplicationChannel(entity, endpoint);
+    entity.channels.push(channel);
+  }
 };
-NetworkEndpoint.prototype.onDestroyEntity = function() {
+NetworkEndpoint.prototype.onDestroyEntity = function(entityId) {
   // TODO: destroy entity
   console.log('TODO: destroy entity');
 };
-NetworkEndpoint.prototype.onUpdateEntityVars = function() {
+NetworkEndpoint.prototype.onUpdateEntityVars = function(entityId, vars) {
   // TODO: update entity
   console.log('TODO: update entity');
 };
-NetworkEndpoint.prototype.onRunEntityFunction = function() {
+NetworkEndpoint.prototype.onRunEntityFunction = function(entityId, funcName, args) {
   // TODO: call entity func
   console.log('TODO: call func on entity');
 };
@@ -109,11 +155,21 @@ NetworkEndpoint.prototype.updateEntityVars = function() {};
 NetworkEndpoint.prototype.runEntityFunction = function() {};
 
 
-function ReplicationChannel() {
-  this.networkEndpoint = null;
-  this.entity = null;
+function ReplicationChannel(entity, endpoint) {
+  this.networkEndpoint = endpoint;
+  this.entity = entity;
   this.varSnapshot = {};
+  this._knownToEndpoint = false;
 }
+
+ReplicationChannel.prototype.tick = function() {
+  // Flush entity creation if unknown.
+  console.log('hi');
+  if (!this._knownToEndpoint) {
+    this.networkEndpoint.createEntity(this.entity.id, this.entity.type);
+    this._knownToEndpoint = true;
+  }
+};
 
 
 var NetworkMode = {

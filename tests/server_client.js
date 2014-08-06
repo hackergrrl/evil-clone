@@ -165,11 +165,13 @@ test('server entity replication', function(t) {
   var serverEndpoint = endpoints[0];
   var clientEndpoint = endpoints[1];
 
-  clientEndpoint.createEntity = function(entityId) {
-    t.ok('entity created');
+  clientEndpoint.createEntity = function(entityId, defName) {
+    t.ok('entity created (id='+entityId+', def='+defName+')');
   };
 
   var serverEntity = serverWorld.createEntity("point-mass");
+  t.equal(serverEntity.id, 1);
+  t.equal(serverEntity.type, 'point-mass');
 
   // TODO(noffle): this is a private function that real code shouldn't use
   serverWorld.tick();
