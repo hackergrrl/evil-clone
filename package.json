@@ -1,7 +1,7 @@
 {
-  "name": "replication-lib",
+  "name": "evil-clone",
   "version": "0.0.1",
-  "description": "A realtime entity replication library for games.",
+  "description": "Easy, realtime entity replication for games.",
   "main": "index.js",
   "scripts": {
     "test": "tape tests/* | faucet"
