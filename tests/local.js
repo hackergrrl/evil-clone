@@ -21,15 +21,15 @@ function localStockWorld() {
     },
 
     funcs: {
-      teleportFixed: function() {
+      teleportFixed: ["server", function() {
         this.x = 50;
         this.y = 60;
-      },
+      }],
 
-      teleportTo: function(toX, toY) {
+      teleportTo: ["server", function(toX, toY) {
         this.x = toX;
         this.y = toY;
-      },
+      }],
     },
 
     replication: function(vars) {

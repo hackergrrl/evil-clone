@@ -3,6 +3,7 @@ function World() {
 }
 
 World.prototype.runAs = function(mode, opts) {
+  this.networkMode = mode;
 };
 
 World.prototype.defineEntity = function(name, opts) {
@@ -32,9 +33,23 @@ World.prototype.createEntity = function(name) {
   }
 
   // Populate funcs.
+  var world = this;
   for (var funcName in def.funcs) {
-    (function(name, f) {
+    (function(name, params) {
+      var server = (params[0] === "server");
+      var client = (params[0] === "client");
+      var multicast = (params[0] === "multicast");
+      var simulated = (params[0] === "simulated");
+      var f = params[1];
       entity[name] = function() {
+        // if (server && world.networkMode === NetworkMode.Client) {
+        //   // TODO: replicate call to server
+        //   return;
+        // }
+        // if (client && world.networkMode !== NetworkMode.Client) {
+        //   // TODO: replicate call to owning client
+        //   return;
+        // }
         f.apply(entity, arguments);
       };
     })(funcName, def.funcs[funcName]);
