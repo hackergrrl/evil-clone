@@ -61,6 +61,8 @@ World.prototype.createEntity = function(name) {
 World.prototype.createNetworkEndpoint = function() {
   var endpoint = new NetworkEndpoint();
 
+  // TODO: track all endpoints in the world
+
   return endpoint;
 };
 
@@ -83,6 +85,8 @@ function NetworkEndpoint() {
 // over the network.
 NetworkEndpoint.prototype.onCreateEntity = function() {
   // TODO: create entity
+  // TODO: create a new ReplicationChannel for each NetworkEndpoint (relevancy)
+  // TODO: have some bit unset that indicates that entity creation hasn't been replicated yet
   console.log('TODO: create entity');
 };
 NetworkEndpoint.prototype.onDestroyEntity = function() {
