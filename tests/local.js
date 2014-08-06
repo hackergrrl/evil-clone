@@ -30,6 +30,11 @@ function localStockWorld() {
         this.x = toX;
         this.y = toY;
       }],
+
+      teleportToFakeClient: ["client", function(toX, toY) {
+        this.x = toX;
+        this.y = toY;
+      }],
     },
 
     replication: function(vars) {
@@ -51,7 +56,7 @@ test('unknown entity def', function(t) {
   t.end();
 });
 
-test('create local entity', function(t) {
+test('create entity', function(t) {
   var world = localStockWorld();
 
   var pmass = world.createEntity("point-mass");
@@ -69,7 +74,7 @@ test('create local entity', function(t) {
   // Q: how do ReplicationChannels get set up?
 });
 
-test('local entity function; no args', function(t) {
+test('entity function; no args', function(t) {
   var world = localStockWorld();
 
   var pmass = world.createEntity("point-mass");
@@ -84,7 +89,7 @@ test('local entity function; no args', function(t) {
   t.end();
 });
 
-test('local entity function; with args', function(t) {
+test('entity function; with args', function(t) {
   var world = localStockWorld();
 
   var pmass = world.createEntity("point-mass");
@@ -99,7 +104,22 @@ test('local entity function; with args', function(t) {
   t.end();
 });
 
-test('local role', function(t) {
+test('entity function; can call client', function(t) {
+  var world = localStockWorld();
+
+  var pmass = world.createEntity("point-mass");
+  t.equal(pmass.x, 0);
+  t.equal(pmass.y, 0);
+
+  pmass.teleportToFakeClient(97, -18);
+
+  t.equal(pmass.x, 97);
+  t.equal(pmass.y, -18);
+
+  t.end();
+});
+
+test('role', function(t) {
   var world = localStockWorld();
 
   var pmass = world.createEntity("point-mass");
