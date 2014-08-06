@@ -55,6 +55,7 @@ test('create local entity', function(t) {
   var world = localStockWorld();
 
   var pmass = world.createEntity("point-mass");
+  t.equal(pmass.type, "point-mass");
   t.equal(pmass.mass, 1);
   t.equal(pmass.x, 0);
 

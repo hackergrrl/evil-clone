@@ -17,12 +17,13 @@ World.prototype.createEntity = function(name) {
   }
 
   var entity = new Entity();
+  entity.type = name;
 
   // Local entities are always Authority.
   entity.role = Role.Authority;
 
-  // We rely on whoever writes the entity def to set a remoteRole, if they
-  // don't want the default of None.
+  // We rely on whoever writes the entity def to set a remoteRole if they don't
+  // want the default of None (no replication).
   entity.remoteRole = Role.None;
 
   // Populate vars.
