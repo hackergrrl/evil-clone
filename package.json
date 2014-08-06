@@ -1,0 +1,14 @@
+{
+  "name": "replication-lib",
+  "version": "0.0.1",
+  "description": "A realtime entity replication library for games.",
+  "main": "index.js",
+  "scripts": {
+    "test": "tape tests/* | faucet"
+  },
+  "author": "Stephen Whitmore",
+  "license": "MIT",
+  "devDependencies": {
+    "tape": "^2.14.0"
+  }
+}
